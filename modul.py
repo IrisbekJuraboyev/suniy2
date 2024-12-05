@@ -18,7 +18,7 @@ avg_purchase_in_month = st.sidebar.number_input("Oylik o'rtacha xaridlar soni (A
   try:
         with open('fayl.pkl', 'rb') as file:
             model = pickle.load(file)
-    except Exception as e:
+  except Exception as e:
         st.error(f"Modelni yuklashda xato: {e}")
 
 # Natijani tekshirish
