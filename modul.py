@@ -16,7 +16,7 @@ avg_purchase_in_month = st.sidebar.number_input("Oylik o'rtacha xaridlar soni (A
 
 # Modelni yuklash
 try:
-    with open('fayl(1).pkl', 'rb') as file:
+    with open('fayl.pkl', 'rb') as file:
         model = pickle.load(file)
 except FileNotFoundError:
     st.error("Model fayli topilmadi. Iltimos, '.pkl' faylini katalogga qo'shing.")
