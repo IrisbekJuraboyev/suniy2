@@ -15,11 +15,16 @@ rejected_rate = st.sidebar.number_input("Rad etilgan mahsulotlar darajasi (Rejec
 avg_purchase_in_month = st.sidebar.number_input("Oylik o'rtacha xaridlar soni (Avg_Purchase_In_Month)", min_value=0, step=1)
 
 # Modelni yuklash
+import traceback
+
+# Modelni yuklash
 try:
-        with open('fayl.pkl', 'rb') as file:
-            model = pickle.load(file)
+    with open('fayl.pkl', 'rb') as file:
+        model = pickle.load(file)
 except Exception as e:
-        st.error(f"Modelni yuklashda xato: {e}")
+    st.error(f"Modelni yuklashda xato: {e}")
+    st.text(traceback.format_exc())  # To'liq xatoni chiqarish
+    st.stop()
 
 # Natijani tekshirish
 if st.button("Klasterni aniqlash"):
