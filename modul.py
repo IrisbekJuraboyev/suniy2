@@ -1,6 +1,7 @@
 import pickle
 import streamlit as st
 import numpy as np
+import traceback
 
 # Sarlavha
 st.title("Mijoz Klasterini Bashorat qilish")
@@ -15,9 +16,6 @@ rejected_rate = st.sidebar.number_input("Rad etilgan mahsulotlar darajasi (Rejec
 avg_purchase_in_month = st.sidebar.number_input("Oylik o'rtacha xaridlar soni (Avg_Purchase_In_Month)", min_value=0, step=1)
 
 # Modelni yuklash
-import traceback
-
-# Modelni yuklash
 try:
     with open('fayl.pkl', 'rb') as file:
         model = pickle.load(file)
@@ -29,7 +27,16 @@ except Exception as e:
 # Natijani tekshirish
 if st.button("Klasterni aniqlash"):
     # Foydalanuvchi kiritgan ma'lumotlarni modelga uzatish
-    input_data = np.array([[geographical_id, net_purchase, avg_invoice_row_no, waste_rate, rejected_rate, avg_purchase_in_month]])
+
+    # Yetishmayotgan 3 xususiyatni qo'shish
+    feature_7 = 0  # Agar xususiyatlar mavjud bo'lmasa, default qiymat bering
+    feature_8 = 0
+    feature_9 = 0
+
+    # Yangi input_data yaratish (9 ta xususiyat)
+    input_data = np.array([[geographical_id, net_purchase, avg_invoice_row_no, waste_rate, rejected_rate, avg_purchase_in_month, feature_7, feature_8, feature_9]])
+
+    # Klasterni bashorat qilish
     klaster = model.predict(input_data)[0]
 
     # Natijalarni chiqarish
