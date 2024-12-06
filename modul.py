@@ -1,6 +1,7 @@
 import streamlit as st
 import pickle
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 # Modelni yuklash
 with open('modelxg.pkl', 'rb') as file:
@@ -53,6 +54,9 @@ st.markdown("""
 # Streamlit interfeysini yaratish
 st.markdown('<div class="title">Bashorat qilish modeli</div>', unsafe_allow_html=True)
 
+# LabelEncoder yaratish
+le = LabelEncoder()
+
 # Kirish qiymatlarini olish
 with st.form(key="input_form"):
     # Kirish qiymatlari uchun nomlar qo‘shilgan
@@ -69,16 +73,19 @@ with st.form(key="input_form"):
 
 # Bashorat qilish
 if submit_button:
+    # Kirish ma'lumotlarini DataFrame formatiga o‘zgartirish
     input_data = pd.DataFrame({
         'Quantity': [quantity],
         'UnitPrice': [unit_price],
         'CustomerID': [customer_id]
     })
     
-try:
-    prediction = model.predict(input_data)
-    st.markdown(f"<h3>Bashorat natijasi:</h3><p>{prediction[0]}</p>", unsafe_allow_html=True)
-except Exception as e:
-    st.error(f"Xatolik: {e}")
+    # Kategorik ustunlarni raqamli qilish (LabelEncoder orqali)
+    input_data['Country'] = le.fit_transform(input_data['Country'].astype(str))
 
-
+    # Modeldan bashorat qilish
+    try:
+        prediction = model.predict(input_data)
+        st.markdown(f"<h3>Bashorat natijasi:</h3><p>{prediction[0]}</p>", unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"Xatolik: {e}")
