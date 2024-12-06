@@ -75,16 +75,23 @@ with st.form(key="input_form"):
 if submit_button:
     # Kirish ma'lumotlarini DataFrame formatiga o‘zgartirish
     input_data = pd.DataFrame({
+        'InvoiceNo': [invoice_no],
+        'StockCode': [stock_code],
+        'Description': [description],
         'Quantity': [quantity],
         'UnitPrice': [unit_price],
-        'CustomerID': [customer_id]
+        'CustomerID': [customer_id],
+        'Country': [country]
     })
-    
-    # Kategorik ustunlarni raqamli qilish (LabelEncoder orqali)
-    input_data['Country'] = le.fit_transform(input_data['Country'].astype(str))
 
-    # Modeldan bashorat qilish
+    # Kategorik ustunlarni raqamli qilish (LabelEncoder orqali)
     try:
+        input_data['CustomerID'] = le.fit_transform(input_data['CustomerID'].astype(str))
+        input_data['StockCode'] = le.fit_transform(input_data['StockCode'].astype(str))
+        input_data['Description'] = le.fit_transform(input_data['Description'].astype(str))
+        input_data['Country'] = le.fit_transform(input_data['Country'].astype(str))
+
+        # Modeldan bashorat qilish
         prediction = model.predict(input_data)
         st.markdown(f"<h3>Bashorat natijasi:</h3><p>{prediction[0]}</p>", unsafe_allow_html=True)
     except Exception as e:
