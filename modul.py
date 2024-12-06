@@ -3,7 +3,7 @@ import pickle
 import pandas as pd
 
 # Modelni yuklash
-with open('modelxgb.pkl', 'rb') as file:
+with open('modelxg.pkl', 'rb') as file:
     model = pickle.load(file)
 
 # HTML va CSS qo‘shish
@@ -70,13 +70,9 @@ with st.form(key="input_form"):
 # Bashorat qilish
 if submit_button:
     input_data = pd.DataFrame({
-        'InvoiceNo': [invoice_no],
-        'StockCode': [stock_code],
-        'Description': [description],
         'Quantity': [quantity],
         'UnitPrice': [unit_price],
-        'CustomerID': [customer_id],
-        'Country': [country]
+        'CustomerID': [customer_id]
     })
     
     # Modelga kirish va bashorat qilish
