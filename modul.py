@@ -75,7 +75,7 @@ if submit_button:
         'CustomerID': [customer_id]
     })
     
-   try:
+try:
     prediction = model.predict(input_data)
     st.markdown(f"<h3>Bashorat natijasi:</h3><p>{prediction[0]}</p>", unsafe_allow_html=True)
 except Exception as e:
