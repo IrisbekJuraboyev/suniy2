@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 # Modelni yuklash
-with open('model.pkl', 'rb') as file:
+with open('modelxgb.pkl', 'rb') as file:
     model = pickle.load(file)
 
 # HTML va CSS qo‘shish
