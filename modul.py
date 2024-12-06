@@ -75,8 +75,10 @@ if submit_button:
         'CustomerID': [customer_id]
     })
     
-    # Modelga kirish va bashorat qilish
+   try:
     prediction = model.predict(input_data)
-    
-    # Natijani chiqarish
     st.markdown(f"<h3>Bashorat natijasi:</h3><p>{prediction[0]}</p>", unsafe_allow_html=True)
+except Exception as e:
+    st.error(f"Xatolik: {e}")
+
+
