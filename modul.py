@@ -41,6 +41,10 @@ if st.button('Bashorat qilish'):
     scaler = StandardScaler()
     normalized_data = scaler.fit_transform(user_data[['Quantity', 'UnitPrice', 'CustomerID']])
 
+    # Agar faqat bitta qator bo'lsa, uni to'g'ri formatga keltirish
+    if normalized_data.shape[0] == 1:
+        normalized_data = normalized_data.reshape(1, -1)
+    
     kmeans = KMeans(n_clusters=3, random_state=42)
     kmeans.fit(normalized_data)  # Normallashtirilgan ma'lumotlar bilan fit qilish
     
