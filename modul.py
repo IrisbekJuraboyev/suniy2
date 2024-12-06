@@ -75,21 +75,15 @@ with st.form(key="input_form"):
 if submit_button:
     # Kirish ma'lumotlarini DataFrame formatiga o‘zgartirish
     input_data = pd.DataFrame({
-        'InvoiceNo': [invoice_no],
-        'StockCode': [stock_code],
-        'Description': [description],
         'Quantity': [quantity],
         'UnitPrice': [unit_price],
-        'CustomerID': [customer_id],
-        'Country': [country]
+        'CustomerID': [customer_id]
     })
 
     # Kategorik ustunlarni raqamli qilish (LabelEncoder orqali)
     try:
         input_data['CustomerID'] = le.fit_transform(input_data['CustomerID'].astype(str))
-        input_data['StockCode'] = le.fit_transform(input_data['StockCode'].astype(str))
-        input_data['Description'] = le.fit_transform(input_data['Description'].astype(str))
-        input_data['Country'] = le.fit_transform(input_data['Country'].astype(str))
+      
 
         # Modeldan bashorat qilish
         prediction = model.predict(input_data)
