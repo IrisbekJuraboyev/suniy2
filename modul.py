@@ -42,7 +42,7 @@ if st.button('Bashorat qilish'):
     normalized_data = scaler.fit_transform(user_data[['Quantity', 'UnitPrice', 'CustomerID']])
 
     kmeans = KMeans(n_clusters=3, random_state=42)
-    kmeans.fit(normalized_data)
+    kmeans.fit(normalized_data)  # Normallashtirilgan ma'lumotlar bilan fit qilish
     
     cluster = kmeans.predict(normalized_data)[0]
     st.write(f"Sizning kiritingan ma'lumotlaringiz {cluster}-klasterga kiradi.")
