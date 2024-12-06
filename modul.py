@@ -60,13 +60,9 @@ le = LabelEncoder()
 # Kirish qiymatlarini olish
 with st.form(key="input_form"):
     # Kirish qiymatlari uchun nomlar qo‘shilgan
-    invoice_no = st.text_input("Invoice No (InvoiceNo)", key="invoice_no")
-    stock_code = st.text_input("Stock Code (StockCode)", key="stock_code")
-    description = st.text_input("Tavsif (Description)", key="description")
     quantity = st.number_input("Miqdor (Quantity)", min_value=0, key="quantity")
     unit_price = st.number_input("Birlik narxi (UnitPrice)", min_value=0.0, key="unit_price")
     customer_id = st.text_input("Mijoz ID (CustomerID)", key="customer_id")
-    country = st.text_input("Mamlakat (Country)", key="country")
     
     # Submit tugmasi
     submit_button = st.form_submit_button(label="Bashorat qilish", use_container_width=True)
@@ -82,11 +78,12 @@ if submit_button:
 
     # Kategorik ustunlarni raqamli qilish (LabelEncoder orqali)
     try:
+        # CustomerID ustunini raqamga aylantirish
         input_data['CustomerID'] = le.fit_transform(input_data['CustomerID'].astype(str))
-      
 
-        # Modeldan bashorat qilish
-        prediction = model.predict(input_data)
-        st.markdown(f"<h3>Bashorat natijasi:</h3><p>{prediction[0]}</p>", unsafe_allow_html=True)
+        # Modeldan klaster bashorat qilish
+        prediction = model.predict(input_data)  # Modelda klasterni bashorat qilish
+
+        st.markdown(f"<h3>Klaster natijasi:</h3><p>{prediction[0]}</p>", unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Xatolik: {e}")
