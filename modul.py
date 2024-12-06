@@ -1,6 +1,5 @@
 import streamlit as st
 import pickle
-import numpy as np
 import pandas as pd
 
 # Modelni yuklash
@@ -56,13 +55,14 @@ st.markdown('<div class="title">Bashorat qilish modeli</div>', unsafe_allow_html
 
 # Kirish qiymatlarini olish
 with st.form(key="input_form"):
-    invoice_no = st.text_input("InvoiceNo", key="invoice_no", label_visibility="collapsed")
-    stock_code = st.text_input("StockCode", key="stock_code", label_visibility="collapsed")
-    description = st.text_input("Description", key="description", label_visibility="collapsed")
-    quantity = st.number_input("Quantity", min_value=0, key="quantity", label_visibility="collapsed")
-    unit_price = st.number_input("UnitPrice", min_value=0.0, key="unit_price", label_visibility="collapsed")
-    customer_id = st.text_input("CustomerID", key="customer_id", label_visibility="collapsed")
-    country = st.text_input("Country", key="country", label_visibility="collapsed")
+    # Kirish qiymatlari uchun nomlar qo‘shilgan
+    invoice_no = st.text_input("Invoice No (InvoiceNo)", key="invoice_no")
+    stock_code = st.text_input("Stock Code (StockCode)", key="stock_code")
+    description = st.text_input("Tavsif (Description)", key="description")
+    quantity = st.number_input("Miqdor (Quantity)", min_value=0, key="quantity")
+    unit_price = st.number_input("Birlik narxi (UnitPrice)", min_value=0.0, key="unit_price")
+    customer_id = st.text_input("Mijoz ID (CustomerID)", key="customer_id")
+    country = st.text_input("Mamlakat (Country)", key="country")
     
     # Submit tugmasi
     submit_button = st.form_submit_button(label="Bashorat qilish", use_container_width=True)
