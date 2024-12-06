@@ -1,89 +1,54 @@
 import streamlit as st
-import pickle
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+import pickle
 
-# Modelni yuklash
-with open('modelxg.pkl', 'rb') as file:
-    model = pickle.load(file)
+# Streamlit interfeysi
+st.title('Klasterlash Modeli: Quantity, UnitPrice, CustomerID, va Country')
 
-# HTML va CSS qo‘shish
-st.markdown("""
-    <style>
-        body {
-            background-color: #f4f4f9;
-            font-family: Arial, sans-serif;
-            color: #333;
-        }
-        .title {
-            color: #0073e6;
-            font-size: 36px;
-            text-align: center;
-            margin-top: 50px;
-        }
-        .container {
-            margin: 50px auto;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #ffffff;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            width: 80%;
-            max-width: 600px;
-        }
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        .button {
-            background-color: #0073e6;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-        .button:hover {
-            background-color: #005bb5;
-        }
-    </style>
-""", unsafe_allow_html=True)
+st.write("""
+    Ushbu web dastur sizga 'Quantity', 'UnitPrice', 'CustomerID', va 'Country' ustunlari asosida klasterlashni amalga oshirishga yordam beradi.
+    Foydalanuvchi qiymatlarni kiritib, mos klasterni aniqlash imkoniyatiga ega bo'ladi.
+""")
 
-# Streamlit interfeysini yaratish
-st.markdown('<div class="title">Bashorat qilish modeli</div>', unsafe_allow_html=True)
+# Foydalanuvchidan qiymatlarni olish
+quantity = st.number_input("Quantity", min_value=1, max_value=10000, value=1)
+unit_price = st.number_input("UnitPrice", min_value=0.0, max_value=1000.0, value=0.0)
+customer_id = st.number_input("CustomerID", min_value=1, max_value=50000, value=1)
+country = st.selectbox("Country", ['United Kingdom', 'Germany', 'France', 'USA', 'Spain', 'Italy'])
 
-# LabelEncoder yaratish
-le = LabelEncoder()
+# Foydalanuvchi kiritgan qiymatlarni DataFrame shaklida saqlash
+input_data = pd.DataFrame({
+    'Quantity': [quantity],
+    'UnitPrice': [unit_price],
+    'CustomerID': [customer_id],
+    'Country': [country]
+})
 
-# Kirish qiymatlarini olish
-with st.form(key="input_form"):
-    # Kirish qiymatlari uchun nomlar qo‘shilgan
-    quantity = st.number_input("Miqdor (Quantity)", min_value=0, key="quantity")
-    unit_price = st.number_input("Birlik narxi (UnitPrice)", min_value=0.0, key="unit_price")
-    customer_id = st.text_input("Mijoz ID (CustomerID)", key="customer_id")
-    
-    # Submit tugmasi
-    submit_button = st.form_submit_button(label="Bashorat qilish", use_container_width=True)
+# Country ustunini raqamli formatga o'tkazish (Label Encoding)
+label_encoder = LabelEncoder()
+input_data['Country'] = label_encoder.fit_transform(input_data['Country'])
 
-# Bashorat qilish
-if submit_button:
-    # Kirish ma'lumotlarini DataFrame formatiga o‘zgartirish
-    input_data = pd.DataFrame({
-        'Quantity': [quantity],
-        'UnitPrice': [unit_price],
-        'CustomerID': [customer_id]
-    })
+# Ma'lumotlarni normallashtirish
+scaler = StandardScaler()
+norm_data = scaler.fit_transform(input_data[['Quantity', 'UnitPrice', 'CustomerID', 'Country']])
 
-    # Kategorik ustunlarni raqamli qilish (LabelEncoder orqali)
+# Klasterlash modelini yuklash (agar mavjud bo'lsa)
+if st.button('Klasterlashni amalga oshirish'):
+    # Modelni yaratish yoki oldindan saqlangan modelni yuklash
     try:
-        # CustomerID ustunini raqamga aylantirish
-        input_data['CustomerID'] = le.fit_transform(input_data['CustomerID'].astype(str))
+        with open('kmeans_model.pkl', 'rb') as f:
+            kmeans_model = pickle.load(f)
+    except FileNotFoundError:
+        kmeans_model = KMeans(n_clusters=3, random_state=42)
+        kmeans_model.fit(norm_data)
+        with open('kmeans_model.pkl', 'wb') as f:
+            pickle.dump(kmeans_model, f)
 
-        # Modeldan klaster bashorat qilish
-        prediction = model.predict(input_data)  # Modelda klasterni bashorat qilish
+    # Klasterlash
+    prediction = kmeans_model.predict(norm_data)
 
-        st.markdown(f"<h3>Klaster natijasi:</h3><p>{prediction[0]}</p>", unsafe_allow_html=True)
-    except Exception as e:
-        st.error(f"Xatolik: {e}")
+    # Bashorat qilingan klasterni foydalanuvchiga ko'rsatish
+    st.write(f"Bashorat qilingan klaster: {prediction[0]}")
