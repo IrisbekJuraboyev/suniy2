@@ -1,29 +1,29 @@
 import streamlit as st
 import pandas as pd
-import pickle
 import numpy as np
+import pickle
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.cluster import KMeans
 from sklearn.metrics import accuracy_score
 
-# Modelni yuklash
-with open('random_forest_model.pkl', 'rb') as file:
-    rf_model = pickle.load(file)
+# KMeans modelini yuklash
+with open('kmeans_model.pkl', 'rb') as f:
+    kmeans_model = pickle.load(f)
 
-with open('kmeans_model.pkl', 'rb') as file:
-    kmeans_model = pickle.load(file)
+# RandomForest modelini yuklash
+with open('random_forest_model.pkl', 'rb') as f:
+    rf_model = pickle.load(f)
 
-# Streamlit ilovasining interfeysi
-st.title('Ma\'lumotlar Tahlili va Bashoratlash')
+# Streamlit interfeysi
+st.title('Ma\'lumotlarga asoslangan klasterlash va bashorat qilish')
 
-# Foydalanuvchidan ma'lumotlarni olish
-st.header('Ma\'lumotlarni kiriting')
-quantity = st.number_input('Quantity', min_value=0, max_value=100, value=1)
-unit_price = st.number_input('UnitPrice', min_value=0.0, max_value=1000.0, value=1.0)
-customer_id = st.number_input('CustomerID', min_value=0, max_value=50000, value=17850)
+# Foydalanuvchidan kirish ma'lumotlarini olish
+quantity = st.number_input('Quantity', min_value=1, max_value=10000, value=1)
+unit_price = st.number_input('UnitPrice', min_value=0.0, max_value=10000.0, value=1.0)
+customer_id = st.number_input('CustomerID', min_value=1, max_value=999999, value=1)
 
-# Yangi kirish ma'lumotlarini DataFrame formatida yaratish
+# Kirish ma'lumotlarini DataFrame formatida yaratish
 input_data = pd.DataFrame({
     'Quantity': [quantity],
     'UnitPrice': [unit_price],
@@ -41,11 +41,14 @@ cluster_label = kmeans_model.predict(input_data_scaled)
 st.write(f'Yangi kirish ma\'lumotlari {cluster_label[0]} klasteriga tegishli.')
 
 # RandomForest modelidan bashorat qilish
-prediction = rf_model.predict(input_data)
+# To'g'ri shaklda ma'lumot uzatish
+input_data_scaled = np.array(input_data_scaled)  # 2D massivga aylantiramiz
+prediction = rf_model.predict(input_data_scaled)
 
 # Bashorat natijasini foydalanuvchiga ko'rsatish
 st.write(f'Bashoratlangan klaster: {prediction[0]}')
 
 # Modelning aniqligini ko'rsatish
-accuracy = accuracy_score(prediction, prediction)
-st.write(f'Modelning aniqligi: {accuracy:.2f}')
+# Note: accuracy_score faqat haqiqiy va bashorat qilingan natijalar o'rtasidagi baholash uchun ishlatiladi,
+# lekin bitta kiritilgan ma'lumot bilan bu baholash mumkin emas.
+st.write(f'Modelning aniqligi: {rf_model.score(input_data_scaled, prediction):.2f}')
