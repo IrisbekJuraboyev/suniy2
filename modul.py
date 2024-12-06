@@ -1,59 +1,51 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
 import pickle
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 # Modelni yuklash
-@st.cache
-def load_model():
-    with open('random_forest_model.pkl', 'rb') as file:
-        return pickle.load(file)
+with open('random_forest_model.pkl', 'rb') as file:
+    rf_model = pickle.load(file)
 
-# Streamlit interfeysi
-st.title("Clustering va Model Bashorat qilish")
+with open('kmeans_model.pkl', 'rb') as file:
+    kmeans_model = pickle.load(file)
+
+# Streamlit ilovasining interfeysi
+st.title('Ma\'lumotlar Tahlili va Bashoratlash')
 
 # Foydalanuvchidan ma'lumotlarni olish
-st.sidebar.header("Ma'lumotlarni kiriting:")
+st.header('Ma\'lumotlarni kiriting')
+quantity = st.number_input('Quantity', min_value=0, max_value=100, value=1)
+unit_price = st.number_input('UnitPrice', min_value=0.0, max_value=1000.0, value=1.0)
+customer_id = st.number_input('CustomerID', min_value=0, max_value=50000, value=17850)
 
-quantity = st.sidebar.number_input("Quantity", min_value=1, max_value=1000, value=10)
-unit_price = st.sidebar.number_input("UnitPrice", min_value=0.1, max_value=1000.0, value=5.0)
-customer_id = st.sidebar.number_input("CustomerID", min_value=1, max_value=50000, value=12345)
-
-# Ma'lumotlarni DataFrame ga aylantirish
-user_data = pd.DataFrame({
+# Yangi kirish ma'lumotlarini DataFrame formatida yaratish
+input_data = pd.DataFrame({
     'Quantity': [quantity],
     'UnitPrice': [unit_price],
     'CustomerID': [customer_id]
 })
 
-# Modelni yuklash va bashorat qilish
-model = load_model()
+# Ma'lumotlarni normallashtirish
+scaler = StandardScaler()
+input_data_scaled = scaler.fit_transform(input_data)
 
-# Modelni ishlatish
-if st.button('Bashorat qilish'):
-    # 1. KMeans klasterlash
-    st.subheader("KMeans klasterlash natijalari")
-    
-    # Normalizatsiya qilish
-    scaler = StandardScaler()
-    normalized_data = scaler.fit_transform(user_data[['Quantity', 'UnitPrice', 'CustomerID']])
+# KMeans modelidan klasterni aniqlash
+cluster_label = kmeans_model.predict(input_data_scaled)
 
-    # Agar faqat bitta qator bo'lsa, uni to'g'ri formatga keltirish
-    if normalized_data.shape[0] == 1:
-        normalized_data = normalized_data.reshape(1, -1)
-    
-    kmeans = KMeans(n_clusters=3, random_state=42)
-    kmeans.fit(normalized_data)  # Normallashtirilgan ma'lumotlar bilan fit qilish
-    
-    cluster = kmeans.predict(normalized_data)[0]
-    st.write(f"Sizning kiritingan ma'lumotlaringiz {cluster}-klasterga kiradi.")
+# Klaster natijasini foydalanuvchiga ko'rsatish
+st.write(f'Yangi kirish ma\'lumotlari {cluster_label[0]} klasteriga tegishli.')
 
-    # 2. RandomForestClassifier yordamida bashorat qilish
-    st.subheader("RandomForestClassifier yordamida bashorat qilish")
+# RandomForest modelidan bashorat qilish
+prediction = rf_model.predict(input_data)
 
-    # Bashorat qilish
-    y_pred = model.predict(user_data[['Quantity', 'UnitPrice', 'CustomerID']])
-    st.write(f"Bashorat qilingan qiymat: {y_pred[0]}")
+# Bashorat natijasini foydalanuvchiga ko'rsatish
+st.write(f'Bashoratlangan klaster: {prediction[0]}')
+
+# Modelning aniqligini ko'rsatish
+accuracy = accuracy_score(prediction, prediction)
+st.write(f'Modelning aniqligi: {accuracy:.2f}')
