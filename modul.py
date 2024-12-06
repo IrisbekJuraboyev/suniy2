@@ -2,53 +2,63 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 import pickle
 
+# Modelni yuklash
+@st.cache
+def load_model():
+    with open('random_forest_model.pkl', 'rb') as file:
+        return pickle.load(file)
+
 # Streamlit interfeysi
-st.title('Klasterlash Modeli: Quantity, UnitPrice, CustomerID, va Country')
+st.title("Clustering va Model Bashorat qilish")
 
-st.write("""
-    Ushbu web dastur sizga 'Quantity', 'UnitPrice', 'CustomerID', va 'Country' ustunlari asosida klasterlashni amalga oshirishga yordam beradi.
-    Foydalanuvchi qiymatlarni kiritib, mos klasterni aniqlash imkoniyatiga ega bo'ladi.
-""")
+# Foydalanuvchidan ma'lumotlarni olish
+st.sidebar.header("Ma'lumotlarni kiriting:")
 
-# Foydalanuvchidan qiymatlarni olish
-quantity = st.number_input("Quantity", min_value=1, max_value=10000, value=1)
-unit_price = st.number_input("UnitPrice", min_value=0.0, max_value=1000.0, value=0.0)
-customer_id = st.number_input("CustomerID", min_value=1, max_value=50000, value=1)
-country = st.selectbox("Country", ['United Kingdom', 'Germany', 'France', 'USA', 'Spain', 'Italy'])
+quantity = st.sidebar.number_input("Quantity", min_value=1, max_value=1000, value=10)
+unit_price = st.sidebar.number_input("UnitPrice", min_value=0.1, max_value=1000.0, value=5.0)
+customer_id = st.sidebar.number_input("CustomerID", min_value=1, max_value=50000, value=12345)
+country = st.sidebar.selectbox("Country", ["United Kingdom", "Germany", "France", "USA", "Australia"])
 
-# Foydalanuvchi kiritgan qiymatlarni DataFrame shaklida saqlash
-input_data = pd.DataFrame({
+# Ma'lumotlarni DataFrame ga aylantirish
+user_data = pd.DataFrame({
     'Quantity': [quantity],
     'UnitPrice': [unit_price],
     'CustomerID': [customer_id],
     'Country': [country]
 })
 
-# Country ustunini raqamli formatga o'tkazish (Label Encoding)
-label_encoder = LabelEncoder()
-input_data['Country'] = label_encoder.fit_transform(input_data['Country'])
+# Modelni yuklash va bashorat qilish
+model = load_model()
 
-# Ma'lumotlarni normallashtirish
-scaler = StandardScaler()
-norm_data = scaler.fit_transform(input_data[['Quantity', 'UnitPrice', 'CustomerID', 'Country']])
+# Modelni ishlatish
+if st.button('Bashorat qilish'):
+    # 1. KMeans klasterlash
+    st.subheader("KMeans klasterlash natijalari")
+    
+    # Normalizatsiya qilish
+    scaler = StandardScaler()
+    normalized_data = scaler.fit_transform(user_data[['Quantity', 'UnitPrice', 'CustomerID']])
 
-# Klasterlash modelini yuklash (agar mavjud bo'lsa)
-if st.button('Klasterlashni amalga oshirish'):
-    # Modelni yaratish yoki oldindan saqlangan modelni yuklash
-    try:
-        with open('kmeans_model.pkl', 'rb') as f:
-            kmeans_model = pickle.load(f)
-    except FileNotFoundError:
-        kmeans_model = KMeans(n_clusters=3, random_state=42)
-        kmeans_model.fit(norm_data)
-        with open('kmeans_model.pkl', 'wb') as f:
-            pickle.dump(kmeans_model, f)
+    kmeans = KMeans(n_clusters=3, random_state=42)
+    kmeans.fit(normalized_data)
+    
+    cluster = kmeans.predict(normalized_data)[0]
+    st.write(f"Sizning kiritingan ma'lumotlaringiz {cluster}-klasterga kiradi.")
 
-    # Klasterlash
-    prediction = kmeans_model.predict(norm_data)
+    # 2. RandomForestClassifier bilan bashorat qilish
+    st.subheader("RandomForestClassifier yordamida bashorat qilish")
 
-    # Bashorat qilingan klasterni foydalanuvchiga ko'rsatish
-    st.write(f"Bashorat qilingan klaster: {prediction[0]}")
+    # Kodni ishlatish uchun Country nomini raqamli ko'rsatkichga aylantirish
+    country_mapping = {"United Kingdom": 1, "Germany": 2, "France": 3, "USA": 4, "Australia": 5}
+    user_data['Country'] = user_data['Country'].map(country_mapping)
+
+    # Bashorat qilish
+    y_pred = model.predict(user_data[['Quantity', 'UnitPrice', 'CustomerID', 'Country']])
+    st.write(f"Bashorat qilingan qiymat: {y_pred[0]}")
+
+# Streamlit ilovasini ishga tushirish
