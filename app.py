@@ -36,5 +36,11 @@ if st.button('Bashorat qilish'):
 
     # Bashorat qilish
     y_pred = model.predict(input_data)
-    st.write(f"Bashorat qilingan qiymat: {y_pred[0]}")
+    if y_pred[0]==0:
+        st.write("Tez-tez xarid qiluvchi mijozlar")
+    elif(y_pred[0]==1):
+        st.write("Arzon mahsulotlar xarid qiluvchilar")
+    else:
+        st.write("Kam xarid qiluvchi mijozlar")
+   #st.write(f"Bashorat qilingan qiymat: {y_pred[0]}")
 
